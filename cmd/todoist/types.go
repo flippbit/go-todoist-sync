@@ -54,6 +54,7 @@ type ProjectDetail struct {
 
 type ParsedItem struct {
 	Id          string
+	TaskId      string
 	Content     string
 	CompletedAt *NullableTime
 	Project     string

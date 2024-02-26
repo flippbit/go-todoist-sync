@@ -43,15 +43,6 @@ func (c *Client) doRequest(method, url string, body []byte) ([]byte, error) {
 	return responseBody, nil
 }
 
-func printStruct(data interface{}) {
-	b, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	fmt.Println(string(b))
-}
-
 func (c *Client) GetCompletedTasks(limit int, offset int) ([]ParsedItem, error) {
 	url := "https://api.todoist.com/sync/v9/completed/get_all" + fmt.Sprintf("?limit=%d&offset=%d", limit, offset)
 
@@ -73,6 +64,7 @@ func (c *Client) GetCompletedTasks(limit int, offset int) ([]ParsedItem, error) 
 	for _, item := range completedTaskResponse.Items {
 		parsedItem := ParsedItem{
 			Id:          item.Id,
+			TaskId:      item.TaskId,
 			Content:     item.Content,
 			CompletedAt: item.CompletedAt,
 			Project:     completedTaskResponse.Projects[item.ProjectId].Name,
@@ -83,7 +75,7 @@ func (c *Client) GetCompletedTasks(limit int, offset int) ([]ParsedItem, error) 
 	return parsedItems, nil
 }
 
-func (c *Client) GetAllCompletedTasks() {
+func (c *Client) GetAllCompletedTasks() ([]ParsedItem, error) {
 	allTasks := []ParsedItem{}
 	offset := 0
 	limit := 200
@@ -101,12 +93,21 @@ func (c *Client) GetAllCompletedTasks() {
 		}
 
 		allTasks = append(allTasks, tasks...)
-		offset += len(tasks)
+		offset += limit
 	}
 
 	log.Printf("Total completed tasks fetched: %d", len(allTasks))
 
-	for _, task := range allTasks {
-		fmt.Printf("%s %s #%s \n\n", task.Content, task.CompletedAt.Format("2006-01-02"), task.Project)
+	return allTasks, nil
+}
+
+func GroupItemsByDate(items []ParsedItem) map[string][]ParsedItem {
+	groupedItems := map[string][]ParsedItem{}
+
+	for _, item := range items {
+		date := item.CompletedAt.Format("2006-01-02")
+		groupedItems[date] = append(groupedItems[date], item)
 	}
+
+	return groupedItems
 }

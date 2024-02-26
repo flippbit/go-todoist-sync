@@ -1,0 +1,5 @@
+GET https://api.todoist.com/sync/v9/completed/get_all
+    ?limit=200
+    &offset=0
+content-type: application/json
+Authorization: Bearer {{$dotenv %API_TOKEN}}

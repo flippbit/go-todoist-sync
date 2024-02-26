@@ -10,29 +10,8 @@ import (
 	"os"
 	"todoist/syncer/cmd/todoist"
 
-	"github.com/TylerBrock/colorjson"
 	"github.com/joho/godotenv"
 )
-
-func printJSON(data []byte) {
-	var obj map[string]interface{}
-	json.Unmarshal(data, &obj)
-
-	f := colorjson.NewFormatter()
-	f.Indent = 4
-
-	s, _ := f.Marshal(obj)
-	fmt.Println(string(s))
-}
-
-func printStruct(data interface{}) {
-	b, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	fmt.Println(string(b))
-}
 
 type ResourceType string
 
@@ -93,6 +72,20 @@ func (e *envVar) getEnvVar() {
 	}
 }
 
+func SaveStructToJSON(data interface{}, path string) error {
+	jsonData, err := json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -102,20 +95,17 @@ func main() {
 	config := envVar{}
 	config.getEnvVar()
 
-	// resourceTypes := []ResourceType{ResourceTypeItems}
-	// syncResponse, err := PerformSync(config.apiToken, resourceTypes)
-	// if err != nil {
-	// 	log.Fatalf("Error performing sync: %v", err)
-	// }
-
-	// if syncResponse.User != nil {
-	// 	printStruct(syncResponse.User)
-	// }
-
-	// if syncResponse.Items != nil {
-	// 	printStruct(syncResponse.Items)
-	// }
-
 	todostClient := todoist.NewClient(config.apiToken)
-	todostClient.GetAllCompletedTasks()
+	items, err := todostClient.GetAllCompletedTasks()
+	if err != nil {
+		log.Fatalf("Error getting completed tasks: %v", err)
+	}
+
+	fmt.Printf("Fetched %d completed tasks\n", len(items))
+
+	groupedItems := todoist.GroupItemsByDate(items)
+
+	fmt.Printf("Total completed tasks fetched: %d\n", len(items))
+	fmt.Printf("Total dates: %d\n", len(groupedItems))
+
 }
