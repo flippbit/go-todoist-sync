@@ -8,6 +8,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
+	"time"
+	"todoist/syncer/cmd/files"
 	"todoist/syncer/cmd/todoist"
 
 	"github.com/joho/godotenv"
@@ -107,5 +110,28 @@ func main() {
 
 	fmt.Printf("Total completed tasks fetched: %d\n", len(items))
 	fmt.Printf("Total dates: %d\n", len(groupedItems))
+
+	var allDates []string
+	for date := range groupedItems {
+		allDates = append(allDates, date)
+	}
+
+	sort.Slice(allDates, func(i, j int) bool {
+		ti, _ := time.Parse("2006-01-02", allDates[i])
+		tj, _ := time.Parse("2006-01-02", allDates[j])
+		return ti.Before(tj)
+	})
+
+	for _, date := range allDates {
+		itemsOnDate := groupedItems[date]
+		fmt.Printf("%s :::\n", date)
+
+		var itemsAsText string
+		for _, item := range itemsOnDate {
+			itemsAsText += fmt.Sprintf("- [x] %s #%s\n", item.Content, item.Project)
+		}
+
+		files.CreateFile(fmt.Sprintf("out/%s.md", date), itemsAsText)
+	}
 
 }

@@ -40,11 +40,11 @@ type Item struct {
 }
 
 type CompletedItem struct {
-	Id          string        `json:"id"`
-	TaskId      string        `json:"task_id"`
-	ProjectId   string        `json:"project_id"`
-	Content     string        `json:"content"`
-	CompletedAt *NullableTime `json:"completed_at"`
+	Id          string    `json:"id"`
+	TaskId      string    `json:"task_id"`
+	ProjectId   string    `json:"project_id"`
+	Content     string    `json:"content"`
+	CompletedAt time.Time `json:"completed_at"`
 }
 
 type ProjectDetail struct {
@@ -56,6 +56,6 @@ type ParsedItem struct {
 	Id          string
 	TaskId      string
 	Content     string
-	CompletedAt *NullableTime
+	CompletedAt time.Time
 	Project     string
 }

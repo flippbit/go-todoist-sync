@@ -111,3 +111,7 @@ func GroupItemsByDate(items []ParsedItem) map[string][]ParsedItem {
 
 	return groupedItems
 }
+
+func ConvertItemToText(item ParsedItem) string {
+	return fmt.Sprintf("%s - %s", item.CompletedAt.Format("15:04"), item.Content)
+}
