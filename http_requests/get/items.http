@@ -1,0 +1,8 @@
+POST https://api.todoist.com/sync/v9/sync
+content-type: application/json
+Authorization: Bearer {{$dotenv %API_TOKEN}}
+
+{
+    "sync_token": "*",
+    "resource_types": ["items"] 
+}
